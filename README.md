@@ -99,3 +99,41 @@ Steps to create the local proxy service
     * `docker exec -ti local-proxy bash`
     * `less /etc/nginx/nginx.conf` and look for your modifications
 
+
+## Use in microservices
+
+Any Docker microservice running with a cert can now leverage this proxy. For example, assume you have an API you want to run locally as `https://api.local.co`. I'll assume you have an nginx conf file in that microservices Docker setup, and it can specify the cert
+
+    ```
+    server {
+        listen 443 ssl;
+        server_name api.local.co;
+        ...
+        ssl_certificate /etc/nginx/certs/api.local.co.crt;
+        ssl_certificate_key /etc/nginx/certs/api.cardata.loc.key;
+    ```
+
+1. Create the cert at `https://www.selfsignedcertificate.com/`
+    * enter your certificate name `api.local.co`
+    * on the next page you will see download links for `api.local.co.key` and `api.local.co.cert`
+        * download, then copy to the correct location in your __microservice__ 
+        * they will actually be named something like `10776813_api.local.co.*` so remove the beginning prefix so the file names start with `api.`, and change `.cert` to `.crt` (personal preference)
+    * copy the exact files into the `certs` directory in your local proxy
+    * in your `docker-compose.yml` file in your __microservice__, add the following environment settings
+
+        ```
+        expose:
+            - 443
+        environment:
+            - VIRTUAL_HOST=api.local.co
+            - VIRTUAL_PROTO=https
+            - VIRTUAL_PORT=443
+        ```
+    * that's it! The proxy will update to proxy to `api.local.co`, and you local service should be listening for that server name. Be sure `api.local.co` is in your local hosts file
+
+
+## Using this project
+    1. Clone it
+    2. Create network and change name if desired
+    3. Add certs
+    4. Run it
