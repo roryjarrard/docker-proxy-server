@@ -36,25 +36,25 @@ Steps to create the local proxy service
     ```
     version: '3'
     networks:
-    web:
-        external: true
+        web:
+            external: true
 
     services:
         nginx-proxy:
-        build:
-            context: .
-            dockerfile: ./Dockerfile
-        container_name: local-proxy
-        networks:
-            - web
-        ports:
-            - 80:80
-            - 443:443
-        volumes:
-            - /var/run/docker.sock:/tmp/docker.sock:ro
-            - ./certs/:/etc/nginx/certs
-        environment:
-            - COMPOSE_CONVERT_WINDOWS_PATHS=1
+            build:
+                context: .
+                dockerfile: ./Dockerfile
+            container_name: local-proxy
+            networks:
+                - web
+            ports:
+                - 80:80
+                - 443:443
+            volumes:
+                - /var/run/docker.sock:/tmp/docker.sock:ro
+                - ./certs/:/etc/nginx/certs
+            environment:
+                - COMPOSE_CONVERT_WINDOWS_PATHS=1
     ```
 
 3. If it doesn't exist, create the `web` network from the compose file. This is bridge network intended on running on your local Docker instance. 
@@ -88,10 +88,14 @@ Steps to create the local proxy service
     ```
     FROM jwilder/nginx-proxy
 
-    COPY nginx.conf:/etc/nginx/nginx.conf   <-- add this line
-
     RUN apt-get update \
         && apt-get install -y vim less
 
+    COPY ./nginx.conf /etc/nginx/nginx.conf   <-- add this line
     COPY ./certs /etc/nginx/certs
     ```
+
+9. You can verify this worked like so
+    * `docker exec -ti local-proxy bash`
+    * `less /etc/nginx/nginx.conf` and look for your modifications
+

@@ -1,0 +1,21 @@
+version: '3'
+networks:
+    web:
+        external: true
+
+services:
+    nginx-proxy:
+        build:
+            context: .
+            dockerfile: ./Dockerfile
+        container_name: local-proxy
+        networks:
+            - web
+        ports:
+            - 80:80
+            - 443:443
+        volumes:
+            - /var/run/docker.sock:/tmp/docker.sock:ro
+            - ./certs/:/etc/nginx/certs
+        environment:
+            - COMPOSE_CONVERT_WINDOWS_PATHS=1
